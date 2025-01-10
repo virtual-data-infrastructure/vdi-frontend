@@ -24,3 +24,23 @@ export default {
   margin-top: 60px;
 }
 </style>
+
+<template>
+  <div id="app">
+    <FileDrop />
+  </div>
+</template>
+
+<script>
+import FileDrop from './components/FileDrop.vue';
+
+export default {
+  components: {
+    FileDrop
+  }
+};
+</script>
+
+<style>
+/* Your styles here */
+</style>
