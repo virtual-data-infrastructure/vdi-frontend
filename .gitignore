@@ -1,0 +1,11 @@
+# ignore certs directory
+certs
+# ignore .env file
+.env
+# ignore node_modules directory
+node_modules
+# ignore some files for the time being
+babel.config.js
+jsconfig.json
+package.json
+package-lock.json
