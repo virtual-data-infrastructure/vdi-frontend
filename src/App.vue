@@ -1,46 +1,30 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div id="app">
+    <!-- <FlexboxLayout /> -->
+    <CSSGrid />
+  </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+// import FlexboxLayout from './components/FlexboxLayout.vue';
+import CSSGrid from './components/CSSGrid.vue';
 
 export default {
-  name: 'App',
   components: {
-    HelloWorld
+    // FlexboxLayout
+    CSSGrid
   }
-}
+};
 </script>
 
 <style>
+/* Global styles (if any) */
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  margin-top: 40px;
 }
-</style>
-
-<template>
-  <div id="app">
-    <FileDrop />
-  </div>
-</template>
-
-<script>
-import FileDrop from './components/FileDrop.vue';
-
-export default {
-  components: {
-    FileDrop
-  }
-};
-</script>
-
-<style>
-/* Your styles here */
 </style>
