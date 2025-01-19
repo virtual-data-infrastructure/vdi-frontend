@@ -4,7 +4,7 @@
       <ProjectFileList :selectedProjectId="selectedProjectId" :selectedProjectName="selectedProjectName" :fileUploaded="fileUploaded" />
     </div>
     <div v-if="selectedProjectId !== null" class="file-drop">
-      <FileDrop @file-uploaded="handleFileUploaded" :selectedProjectId="selectedProjectId" :selectedProjectName="selectedProjectName" />
+      <FileDrop @fileUploaded="handleFileUploaded" :selectedProjectId="selectedProjectId" :selectedProjectName="selectedProjectName" />
     </div>
   </div>
 </template>
