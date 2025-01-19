@@ -30,6 +30,7 @@ import axios from 'axios';
 
 export default {
   props: [],
+  emits: ['project-selected'],
   data() {
     return {
       newProjectName: '',
@@ -70,6 +71,7 @@ export default {
         this.selectedProjectId = projectId;
         this.selectedProjectName = projectName;
       }
+      console.log(`emit 'project-selected(${this.selectedProjectId}, ${this.selectedProjectName})'`);
       this.$emit('project-selected', this.selectedProjectId, this.selectedProjectName);
     },
     confirmDeleteProject(projectId, projectName) {
@@ -85,6 +87,7 @@ export default {
         if (this.selectedProjectId === projectId) {
           this.selectedProjectId = null; // reset selected project if it was deleted
           this.selectedProjectName = null; // reset selected project if it was deleted
+          console.log(`emit 'project-selected(${this.selectedProjectId}, ${this.selectedProjectName})'`);
           this.$emit('project-selected', this.selectedProjectId, this.selectedProjectName);
         }
       } catch (error) {

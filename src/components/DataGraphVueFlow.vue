@@ -1,156 +1,150 @@
 <script setup>
-import { nextTick, ref } from 'vue';
-import { VueFlow, useVueFlow } from '@vue-flow/core';
-import { Background } from '@vue-flow/background';
-import ProcessNode from './ProcessNode.vue';
-import AnimationEdge from './AnimationEdge.vue';
-
-import { initialEdges, initialNodes } from './initial-elements.js';
-import { useRunProcess } from './useRunProcess';
-import { useLayout } from './useLayout';
-
+import { ref, onMounted, defineProps } from 'vue';
+import axios from 'axios';
+import * as dagre from 'dagre';
+import * as d3 from 'd3';
 import '@vue-flow/core/dist/style.css';
 
-const nodes = ref(initialNodes)
+const props = defineProps({
+  selectedProjectId: Number,
+  selectedProjectName: String,
+});
 
-const edges = ref(initialEdges)
+const graphContainer = ref(null);
+//const svgRef = ref(null);
+//const zoom = ref(null);
+let svg;
+let zoomBehavior;
 
-const cancelOnError = ref(true)
+let nodes = null;
+let edges = null;
 
-const { graph, layout } = useLayout()
+async function drawGraph() {
+  const g = new dagre.graphlib.Graph();
+  // get nodes and edges from REST API
+  try {
+    const response = await axios.get(`https://vdi-api.nessi.no:9815/dataflow/${props.selectedProjectId}`);
+    console.log("response.data.nodes: ", response.data.nodes);
+    console.log("response.data.edges: ", response.data.edges);
+    nodes = response.data.nodes;
+    edges = response.data.edges;
+    // add width and height
+    const width_height = { 'width': 50, 'height': 20 };
+    nodes.forEach((node) => {
+      Object.assign(node, width_height);
+    });
+  } catch (error) {
+    console.error('Error fetching nodes & edges:', error);
+  }
+  // calculate the layout
+  try {
+    // NEW approach
+    g.setGraph({
+      rankdir: 'LR' // layout from left to right
+    });
+    g.setDefaultEdgeLabel(() => ({}));
+    nodes.forEach((node) => {
+      g.setNode(node.id, node);
+    });
+    edges.forEach((edge) => {
+      g.setEdge(edge.source, edge.target);
+    });
+    dagre.layout(g);
+  } catch(error) {
+    console.error('Error creating layout:', error);
+  }
+  // draw the layout
+  const width = 500;
+  const height = 500;
 
-const { stop, reset } = useRunProcess({ graph, cancelOnError })
+  svg = d3
+    .select(graphContainer.value)
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .attr('viewBox', `0 0 ${width} ${height}`);
+  const svgGroup = svg.append("g");
+  // draw edges
+  g.edges().forEach((edge) => {
+    //const edgeData = g.edge(edge);
+    svgGroup
+      .append("line")
+      .attr("x1", g.node(edge.v).x)
+      .attr("y1", g.node(edge.v).y)
+      .attr("x2", g.node(edge.w).x)
+      .attr("y2", g.node(edge.w).y)
+      .attr("stroke", "black")
+      .attr("stroke-width", 7);
+  });
+  // draw nodes
+  g.nodes().forEach((node) => {
+    const nodeData = g.node(node);
+    console.log('nodeData: ', nodeData);
+    console.log('x: ', nodeData.x - nodeData.width / 2);
+    console.log('y: ', nodeData.y - nodeData.height / 2);
+    svgGroup
+      .append("rect")
+      .attr("x", nodeData.x - nodeData.width / 2)
+      .attr("y", nodeData.y - nodeData.height / 2)
+      .attr("width", nodeData.width)
+      .attr("height", nodeData.height)
+      .attr("fill", "lightblue");
 
-const { fitView } = useVueFlow()
+    svgGroup
+      .append("text")
+      .attr("x", nodeData.x)
+      .attr("y", nodeData.y)
+      .attr("dy", ".35em")
+      .attr("text-anchor", "middle")
+      .text(node);
+  });
 
-async function layoutGraph(direction) {
-  await stop()
-    
-  reset(nodes.value)
-    
-  nodes.value = layout(nodes.value, edges.value, direction)
-    
-  nextTick(() => {
-    fitView()
-  })
+  // center the graph
+  const bbox = svgGroup.node().getBBox();
+  const offsetX = (width - bbox.width) / 2 - bbox.x;
+  const offsetY = (height - bbox.height) / 2 - bbox.y;
+  svgGroup.attr('transform', `translate(${offsetX}, ${offsetY})`);
+
+  // add zoom behavior
+  zoomBehavior = d3.zoom().on('zoom', (event) => {
+    svgGroup.attr('transform', event.transform);
+  });
+  svg.call(zoomBehavior);
 }
+
+const zoomIn = () => {
+  if (svg && zoomBehavior) {
+    svg.transition().duration(750).call(zoomBehavior.scaleBy, 1.2);
+  }
+};
+
+const zoomOut = () => {
+  if (svg && zoomBehavior) {
+    svg.transition().duration(750).call(zoomBehavior.scaleBy, 0.8);
+  }
+};
+
+onMounted(() => {
+  drawGraph();
+});
 </script>
 
 <template>
-  <div class="layout-flow" style="width: 100%; height: 400px;">
-    <VueFlow
-      :selectedProjectId="selectedProjectId" :selectedProjectName="selectedProjectName"
-      v-model:nodes="nodes"
-      v-model:edges="edges"
-      :default-edge-options="{ type: 'animation', animated: false }"
-      @nodes-initialized="layoutGraph('LR')"
-    >
-      <template #node-process="props">
-        <ProcessNode :data="props.data" :source-position="props.sourcePosition" :target-position="props.targetPosition" />
-      </template>
-
-      <template #edge-animation="edgeProps">
-        <AnimationEdge
-          :id="edgeProps.id"
-          :source="edgeProps.source"
-          :target="edgeProps.target"
-          :source-x="edgeProps.sourceX"
-          :source-y="edgeProps.sourceY"
-          :targetX="edgeProps.targetX"
-          :targetY="edgeProps.targetY"
-          :source-position="edgeProps.sourcePosition"
-          :target-position="edgeProps.targetPosition"
-          :data="edgeProps.data"
-        />
-      </template>
-
-      <Background />
-    </VueFlow>
+  <div class="project-file-list-title">
+    <b>Data flow graph for project</b> <i>{{ selectedProjectName }}</i>
+  </div>
+  <div class="graph-container" ref="graphContainer">
+    <div class="zoom-controls">
+      <button @click="zoomIn">+</button>
+      <button @click="zoomOut">-</button>
+    </div>
   </div>
 </template>
 
 <style>
-.layout-flow {
-  background-color: #1a192b;
-}
-
-.process-panel,
-.layout-panel {
-  display: flex;
-  gap: 10px;
-}
-
-.process-panel {
-  background-color: #2d3748;
-  padding: 10px;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-  display: flex;
-  flex-direction: column;
-}
-
-.process-panel button {
-  border: none;
-  cursor: pointer;
-  background-color: #4a5568;
-  border-radius: 8px;
-  color: white;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-}
-
-.process-panel button {
-  font-size: 16px;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.checkbox-panel {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.process-panel button:hover,
-.layout-panel button:hover {
-  background-color: #2563eb;
-  transition: background-color 0.2s;
-}
-
-.process-panel label {
-  color: white;
-  font-size: 12px;
-}
-
-.stop-btn svg {
-  display: none;
-}
-
-.stop-btn:hover svg {
-  display: block;
-}
-
-.stop-btn:hover .spinner {
-  display: none;
-}
-
-.spinner {
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #2563eb;
-  border-radius: 50%;
-  width: 10px;
-  height: 10px;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+.graph-container {
+  position: relative;
+  margin-top: 5px;
+  border: 1px solid #ccc;
 }
 </style>

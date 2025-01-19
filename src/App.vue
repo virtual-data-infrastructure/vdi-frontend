@@ -1,18 +1,32 @@
 <template>
   <div id="app">
-    <!-- <FlexboxLayout /> -->
-    <CSSGrid />
+    <CSSGrid
+      :selectedProjectId="selectedProjectId"
+      :selectedProjectName="selectedProjectName"
+      @update:selectedProject="handleUpdateSelectedProject"
+    />
   </div>
 </template>
 
 <script>
-// import FlexboxLayout from './components/FlexboxLayout.vue';
 import CSSGrid from './components/CSSGrid.vue';
 
 export default {
   components: {
-    // FlexboxLayout
     CSSGrid
+  },
+  data() {
+    return {
+      selectedProjectId: null,
+      selectedProjectName: null,
+    };
+  },
+  methods: {
+    handleUpdateSelectedProject(newProjectId, newProjectName) {
+      console.log(`received 'update:selectedProject(${newProjectId}, ${newProjectName})'`);
+      this.selectedProjectId = newProjectId;
+      this.selectedProjectName = newProjectName;
+    }
   }
 };
 </script>

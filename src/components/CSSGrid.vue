@@ -2,7 +2,7 @@
 <template>
   <div class="grid-container">
     <div class="project-list">
-      <ProjectList @project-selected="handleProjectSelected" />
+      <ProjectList @project-selected="updateSelectedProject" />
     </div>
     <div class="center-column">
       <CenterColumn :slotName="selectTab" :selectedProjectId="selectedProjectId" :selectedProjectName="selectedProjectName" />
@@ -15,13 +15,23 @@ import ProjectList from './ProjectList.vue';
 import CenterColumn from './CenterColumn.vue';
 
 export default {
+  emits: ['update:selectedProject'],
+  props: {
+    selectedProjectId: {
+      type: Number,
+      default: null
+    },
+    selectedProjectName: {
+      type: String,
+      default: null
+    }
+  },
   components: {
     CenterColumn,
     ProjectList,
   },
   data() {
     return {
-      selectedProjectId: this.selectedProjectId,
       currentTab: 'tab1',
     };
   },
@@ -35,9 +45,12 @@ export default {
     }
   },
   methods: {
-    handleProjectSelected(projectId, projectName) {
-      this.selectedProjectId = projectId;
-      this.selectedProjectName = projectName;
+    updateSelectedProject(newProjectId, newProjectName) {
+      //this.selectedProjectId = projectId;
+      //this.selectedProjectName = projectName;
+      console.log(`received 'project-selected(${newProjectId}, ${newProjectName})'`);
+      console.log(`emit 'update:selectedProject(${newProjectId}, ${newProjectName})'`);
+      this.$emit('update:selectedProject', newProjectId, newProjectName);
     }
   }
 };

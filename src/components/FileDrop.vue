@@ -75,6 +75,7 @@ const LOG_FILTERS = [
 
 export default {
   name: 'FileDrop',
+  emits: ['fileUploaded'],
   props: {
     selectedProjectName: {
       type: String,
@@ -140,7 +141,7 @@ export default {
         });
         console.log('Upload successful:', response.data);
         this.removeFileFromList(this.files[index].name);
-        this.$emit('file-uploaded');
+        this.$emit('fileUploaded');
       } catch (error) {
         console.error('Upload failed:', error);
         if (error.response) {
@@ -175,7 +176,7 @@ export default {
         });
         console.log('Upload successful:', response.data);
         this.removeFilesFromList();
-        this.$emit('file-uploaded');
+        this.$emit('fileUploaded');
       } catch (error) {
         console.error('Upload failed:', error);
         if (error.response) {
