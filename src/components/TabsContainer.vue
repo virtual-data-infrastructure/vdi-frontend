@@ -22,7 +22,7 @@
 <script>
 import WelcomeInfo from './WelcomeInfo.vue';
 import ProjectContent from './ProjectContent.vue';
-import DataGraphVueFlow from './DataGraphVueFlow.vue';
+import DataFlowGraph from './DataFlowGraph.vue';
 
 export default {
   name: 'TabsContainer',
@@ -48,7 +48,7 @@ export default {
   components: {
     WelcomeInfo,
     ProjectContent,
-    DataGraphVueFlow,
+    DataFlowGraph,
   },
   computed: {
     currentSlotName() {
@@ -63,7 +63,7 @@ export default {
         case 1:
           return 'ProjectContent';
         case 2:
-          return 'DataGraphVueFlow';
+          return 'DataFlowGraph';
         default:
           return 'WelcomeInfo';
       }
