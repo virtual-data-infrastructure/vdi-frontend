@@ -59,7 +59,7 @@ export default {
 <style scoped>
 .grid-container {
   display: grid;
-  grid-template-columns: 1fr 2fr; /* 1 part ProjectList, 2 parts FileDrop */
+  grid-template-columns: 1fr 3fr; /* 1 part ProjectList, 2 parts FileDrop */
   height: 100vh; /* Full height of the viewport */
   gap: 10px; /* Space between components */
 }
