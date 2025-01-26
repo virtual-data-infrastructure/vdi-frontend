@@ -16,8 +16,8 @@ const svg = ref(null);
 const svgElement = ref(null);
 const mainGroup = ref(null);
 const g = ref(null);
-const width = ref(500);
-const height = ref(350);
+const width = ref(1200);
+const height = ref(1200);
 
 const nodes = reactive([]);
 const edges = reactive([]);
@@ -217,32 +217,119 @@ const drawGraph = () => {
   const getAnchorPoints = (nodeV, nodeW) => {
     const v = g.value.node(nodeV);
     const w = g.value.node(nodeW);
-    const dx = w.x - v.x;
-    const dy = w.y - v.y;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-    const offsetX = (dx / distance) * (v.width / 2);
-    const offsetY = (dy / distance) * (v.height / 2);
+    //const dx = w.x - v.x; // horizontal distance between nodes
+    //const dy = w.y - v.y; // vertical distance between nodes
+    //const distance = Math.sqrt(dx * dx + dy * dy); // straight distance between nodes
+    //const offsetX = (dx / distance) * (v.width / 2);
+    //const offsetY = (dy / distance) * (v.height / 2);
+    //return {
+    //  x1: v.x + offsetX,
+    //  y1: v.y + offsetY,
+    //  x2: w.x - (dx / distance) * (w.width / 2) - 5,
+    //  y2: w.y - (dy / distance) * (w.height / 2),
+    //};
+    const x1 = v.x + v.width / 2; // v.east
+    const y1 = v.y; // v.east
+    const x2 = w.x - w.width / 2; // w.west
+    const y2 = w.y; // w.west
     return {
-      x1: v.x + offsetX,
-      y1: v.y + offsetY,
-      x2: w.x - (dx / distance) * (w.width / 2) - 5,
-      y2: w.y - (dy / distance) * (w.height / 2),
+      x1: x1,
+      y1: y1,
+      x2: x2 - 5,
+      y2: y2,
     };
   };
 
-  // draw edges with arrow markers
+  // draw straight edges with arrow markers
+//  g.value.edges().forEach((edge) => {
+//    const { x1, y1, x2, y2 } = getAnchorPoints(edge.v, edge.w);
+//    const source = { x: x1, y: y1 };
+//    const target = { x: x2, y: y2 };
+//    const points = [
+//      { x: source.x, y: source.y },
+//      { x: (source.x + target.x) / 2, y: source.y },
+//      { x: (source.x + target.x) / 2, y: target.y },
+//      { x: target.x, y: target.y },
+//    ];
+//    mainGroup.value
+//      .append('line')
+//      .attr('x1', x1)
+//      .attr('y1', y1)
+//      .attr('x2', x2)
+//      .attr('y2', y2)
+//      .attr('stroke', 'black')
+//      .attr('stroke-width', 2)
+//      .attr('marker-end', 'url(#arrow)');
+//  });
+
+  // draw stepwise edges with arrow markers
   g.value.edges().forEach((edge) => {
     const { x1, y1, x2, y2 } = getAnchorPoints(edge.v, edge.w);
+    const source = { x: x1, y: y1 };
+    const target = { x: x2, y: y2 };
+    const points = [
+      { x: source.x, y: source.y },
+      { x: (source.x + target.x) / 2, y: source.y },
+      { x: (source.x + target.x) / 2, y: target.y },
+      { x: target.x, y: target.y },
+    ];
     mainGroup.value
-      .append('line')
-      .attr('x1', x1)
-      .attr('y1', y1)
-      .attr('x2', x2)
-      .attr('y2', y2)
+      .append('polyline')
+      .attr('points', points.map(p => `${p.x},${p.y}`).join(' '))
       .attr('stroke', 'black')
       .attr('stroke-width', 2)
+      .attr('fill', 'none')
       .attr('marker-end', 'url(#arrow)');
   });
+
+  // draw quadratic bezier edges with arrow markers
+//  g.value.edges().forEach((edge) => {
+//    const { x1, y1, x2, y2 } = getAnchorPoints(edge.v, edge.w);
+//    const source = { x: x1, y: y1 };
+//    const target = { x: x2, y: y2 };
+//
+//    const midX = (source.x + target.x) / 2;
+//    const midY = (source.y + target.y) / 2;
+//
+//    const d = `
+//      M ${source.x},${source.y}
+//      Q ${midX},${source.y} ${midX},${midY}
+//      T ${target.x},${target.y}
+//    `;
+//
+//    mainGroup.value
+//      .append('path')
+//      .attr('d', d)
+//      .attr('stroke', 'black')
+//      .attr('stroke-width', 2)
+//      .attr('fill', 'none')
+//      .attr('marker-end', 'url(#arrow)');
+//  });
+
+  // draw cubic bezier edges with arrow markers
+//  g.value.edges().forEach((edge) => {
+//    const { x1, y1, x2, y2 } = getAnchorPoints(edge.v, edge.w);
+//    const source = { x: x1, y: y1 };
+//    const target = { x: x2, y: y2 };
+//
+//    const controlPoint1 = { x: (2 * source.x + target.x) / 3, y: source.y };
+//    const controlPoint2 = { x: (source.x + 2 * target.x) / 3, y: target.y };
+//
+//    const d = `
+//      M ${source.x},${source.y}
+//      C ${controlPoint1.x},${controlPoint1.y}
+//        ${controlPoint2.x},${controlPoint2.y}
+//        ${target.x},${target.y}
+//    `;
+//
+//    mainGroup.value
+//      .append('path')
+//      .attr('d', d)
+//      .attr('stroke', 'black')
+//      .attr('stroke-width', 2)
+//      .attr('fill', 'none')
+//      .attr('marker-end', 'url(#arrow)');
+//  });
 
   console.log("centering the graph");
 
@@ -306,8 +393,8 @@ watch([width, height], resizeSVG);
   <div ref="container" class="container">
     <svg
       ref="svg"
-      width="500" height="350"
-      viewBox="0 0 500 350"
+      width="1200" height="1200"
+      viewBox="0 0 1200 1200"
       style="border: 0px solid black;">
       <g ref="mainGroup">
         <!-- D3 will render the graph here -->
