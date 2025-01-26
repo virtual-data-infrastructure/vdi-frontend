@@ -375,6 +375,9 @@ function initializeZoom() {
 }
 
 onMounted(async () => {
+  if (props.selectedProjectName === null) {
+    return;
+  }
   await fetchNodesAndEdges();
   layoutNodes();
   drawGraph();
@@ -392,6 +395,9 @@ watch([width, height], resizeSVG);
 
 watch(() => props.selectedProjectName, async (newValue, oldValue) => {
   console.log("watcher for selectedProjectName: old/new", oldValue, "/", newValue);
+  if (props.selectedProjectName === null) {
+    return;
+  }
   if (newValue !== oldValue) {
     nodes.length = 0;
     edges.length = 0;
@@ -407,10 +413,11 @@ watch(() => props.selectedProjectName, async (newValue, oldValue) => {
 </script>
 
 <template>
-  <div class="project-file-list-title">
+  <div v-if="selectedProjectName !== null" class="project-file-list-title">
     <b>Data flow graph for project</b> <i>{{ selectedProjectName }}</i>
   </div>
-  <div ref="container" class="container">
+  <p v-if="selectedProjectName === null" style="text-align: center; font-size: 2em"><i>select a project from the list on the left to show its graph</i></p>
+  <div v-if="selectedProjectName !== null" ref="container" class="container">
     <svg
       ref="svg"
       width="1200" height="1200"
