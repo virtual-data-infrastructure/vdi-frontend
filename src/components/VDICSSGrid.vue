@@ -4,32 +4,30 @@
     <div class="view-list">
       <VDIViewList @view-selected="updateSelectedView" />
     </div>
-<!--
     <div class="center-column">
-      <CenterColumn :slotName="selectTab" :selectedViewId="selectedViewId" :selectedViewName="selectedViewName" />
+      <VDICenterColumn :slotName="selectTab" :selectedViewId="selectedViewId" :selectedViewName="selectedViewName" />
     </div>
--->
   </div>
 </template>
 
 <script>
 import VDIViewList from './VDIViewList.vue';
-//import CenterColumn from './CenterColumn.vue';
+import VDICenterColumn from './VDICenterColumn.vue';
 
 export default {
   emits: ['update:selectedView'],
-//  props: {
-//    selectedViewId: {
-//      type: Number,
-//      default: null
-//    },
-//    selectedViewName: {
-//      type: String,
-//      default: null
-//    }
-//  },
+  props: {
+    selectedViewId: {
+      type: Number,
+      default: null
+    },
+    selectedViewName: {
+      type: String,
+      default: null
+    }
+  },
   components: {
-//    CenterColumn,
+    VDICenterColumn,
     VDIViewList,
   },
   data() {
@@ -37,22 +35,22 @@ export default {
       currentTab: 'tab1',
     };
   },
-//  computed: {
-//    selectTab() {
-//      if (this.selectedViewId === null) {
-//        return 'tab1';
-//      } else {
-//        return 'tab2';
-//      }
-//    }
-//  },
-//  methods: {
-//    updateSelectedView(newViewId, newViewName) {
-//      console.log(`received 'view-selected(${newViewId}, ${newViewName})'`);
-//      console.log(`emit 'update:selectedView(${newViewId}, ${newViewName})'`);
-//      this.$emit('update:selectedView', newViewId, newViewName);
-//    }
-//  }
+  computed: {
+    selectTab() {
+      if (this.selectedViewId === null) {
+        return 'tab1';
+      } else {
+        return 'tab2';
+      }
+    }
+  },
+  methods: {
+    updateSelectedView(newViewId, newViewName) {
+      console.log(`received 'view-selected(${newViewId}, ${newViewName})'`);
+      console.log(`emit 'update:selectedView(${newViewId}, ${newViewName})'`);
+      this.$emit('update:selectedView', newViewId, newViewName);
+    }
+  }
 };
 </script>
 
