@@ -30,7 +30,12 @@ const styleMapping = {
 
 // helper functions
 const stripLogNumber = (str) => {
-  return str.split(/##/)[1];
+  const program_name_pattern = /^log-\d+##/;
+  if (program_name_pattern.test(str)) {
+    return str.split(/##/)[1];
+  } else {
+    return str;
+  }
 };
 
 function resizeSVG() {
@@ -384,6 +389,21 @@ onBeforeUnmount(() => {
 });
 
 watch([width, height], resizeSVG);
+
+watch(() => props.selectedProjectName, async (newValue, oldValue) => {
+  console.log("watcher for selectedProjectName: old/new", oldValue, "/", newValue);
+  if (newValue !== oldValue) {
+    nodes.length = 0;
+    edges.length = 0;
+    await fetchNodesAndEdges();
+    layoutNodes();
+    drawGraph();
+
+    initializeZoom();
+    window.addEventListener('resize', resizeSVG);
+    resizeSVG(); // Initial resizing
+  }
+});
 </script>
 
 <template>
