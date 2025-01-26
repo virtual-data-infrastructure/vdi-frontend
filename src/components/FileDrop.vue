@@ -63,13 +63,16 @@ const LOG_FILTERS = [
   '12@@@^open$@@@13@@@^/proc',
   '12@@@^openat$@@@14@@@^/proc',
   '12@@@^fopen$@@@13@@@^/proc',
+  '12@@@^fopen64$@@@13@@@^/proc',
   '12@@@^openat$@@@14@@@^/run',
   '12@@@^open$@@@13@@@^/sys',
   '12@@@^openat$@@@14@@@^/sys',
   '12@@@^fopen$@@@13@@@^/sys',
   '12@@@^open$@@@13@@@^/tmp/ompi',
   '12@@@^fopen$@@@13@@@^/tmp/ompi',
+  '12@@@^open64$@@@13@@@^/tmp/__pycache__',
   '12@@@^fopen$@@@13@@@ucx.conf$',
+  '12@@@^open64$@@@13@@@^/usr/share',
   '12@@@^fopen$@@@13@@@^/usr/share',
 ];
 
