@@ -12,12 +12,23 @@
       >
         <td class="name-column">{{ file.filename }}</td>
         <td class="actions-column">
+          <button @click.stop="showDownloadUrl(file.filename)" class="link-button">
+            <img src="@/assets/241px-Chain_link_icon_slanted.png" alt="link" class="link-icon"/>
+          </button>
           <button @click.stop="confirmDeleteFile(this.selectedViewId, file.id, file.filename)" class="delete-button">
             <img src="@/assets/Trash_89060_The_Noun_Project.png" alt="delete" class="delete-icon"/>
           </button>
         </td>
       </tr>
     </table>
+    <!-- popup modal -->
+    <div v-if="showPopup" class="popup">
+      <div class="popup-content">
+        <span class="close-button" @click="closePopup">&times;</span>
+        <p>Download URL: <a :href="downloadUrl" target="_blank">{{ downloadUrl }}</a></p>
+      </div>
+    </div>
+
     <p v-if="files.length === 0" style="text-align: left;"><i>none yet</i></p>
   </div>
 </template>
@@ -44,6 +55,8 @@ export default {
     return {
       files: [],
       selectedFileId: null,
+      showPopup: false,
+      downloadUrl: '',
     };
   },
   watch: {
@@ -89,6 +102,15 @@ export default {
         this.deleteFile(viewId, fileId);
       }
     },
+    showDownloadUrl(fileName) {
+      const baseUrl = 'https://vdi-api.nessi.no:9815/download';
+      this.downloadUrl = `${baseUrl}/${this.selectedViewName}/${fileName}`;
+      // show popup
+      this.showPopup = true;
+    },
+    closePopup() {
+      this.showPopup = false;
+    },
     async deleteFile(viewId, fileId) {
       try {
         await axios.delete(`https://vdi-api.nessi.no:9815/views/${viewId}/${fileId}`);
@@ -110,6 +132,37 @@ export default {
 </script>
 
 <style scoped>
+.popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.popup-content {
+  background: white;
+  padding: 20px;
+  border-radius: 5px;
+  width: 80%;
+  max-width: 1000px;
+  position: relative;
+  word-wrap: break-word;
+  text-align: center;
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+  font-size: 24px;
+}
+
 .view-file-list-title {
   margin-bottom: 10px;
   font-family: Avenir, Helvetica, Arial, sans-serif;
@@ -156,11 +209,44 @@ button {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
+  cursor: pointer;
+}
+
+/*
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+*/
+
+button i {
+  font-size: 24px;
+  color: #007bff;
+}
+
+button i:hover {
+  color: #0056b3;
 }
 
 .create-button {
   padding: 5px 5px 5px 5px;
   margin: 5px 5px 5px 5px;
+}
+
+.link-button {
+  padding: 0px;
+  margin: 0px;
+  margin-right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.link-icon {
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
 }
 
 .delete-button {
